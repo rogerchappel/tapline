@@ -1,0 +1,15 @@
+{
+  "project": "tapline",
+  "factoryRun": "2026-05-05T06:30:00+10:00",
+  "owner": "isolated-sub-agent",
+  "waves": ["docs", "library", "cli", "fixtures", "tests", "publish", "protect-main"],
+  "boundaries": {
+    "repoOnly": true,
+    "localFirst": true,
+    "readOnlyByDefault": true,
+    "noSecrets": true,
+    "noHiddenTelemetry": true,
+    "explicitCommandExecution": true
+  },
+  "verification": ["npm test", "npm run check", "npm run build", "npm run smoke", "bash scripts/validate.sh", "real CLI fixture smoke"]
+}
