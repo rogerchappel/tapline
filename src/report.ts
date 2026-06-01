@@ -21,7 +21,7 @@ export function renderMarkdown(report: TaplineReport): string {
     ...report.checklist.map((item) => `- ${statusIcon(item.status)} **${item.title}** — ${item.detail}`),
     '',
     '## Explicit dry-run validation commands',
-    ...report.validationCommands.map((cmd) => `- \`${[cmd.command, ...cmd.args].join(' ')}\` (${cmd.reason})`)
+    ...report.validationCommands.map((cmd) => `- \`${renderShellCommand([cmd.command, ...cmd.args])}\` (${cmd.reason})`)
   ];
   if (report.commandResults) {
     lines.push('', '## Command results');
@@ -35,4 +35,13 @@ export function renderMarkdown(report: TaplineReport): string {
 
 export function renderJson(report: TaplineReport): string {
   return `${JSON.stringify(report, null, 2)}\n`;
+}
+
+function renderShellCommand(parts: string[]): string {
+  return parts.map(shellQuote).join(' ');
+}
+
+function shellQuote(value: string): string {
+  if (/^[A-Za-z0-9_./:=@+-]+$/.test(value)) return value;
+  return `'${value.replaceAll("'", "'\\''")}'`;
 }

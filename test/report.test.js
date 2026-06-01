@@ -15,3 +15,19 @@ test('renderReport emits markdown by default', async () => {
   assert.match(markdown, /# Tapline report: sample-tap/);
   assert.match(markdown, /Explicit dry-run validation commands/);
 });
+
+test('renderReport shell-quotes validation paths with spaces', async () => {
+  const report = await createReport('examples/fixtures/sample-tap', { now: new Date('2026-05-05T00:00:00Z') });
+  report.validationCommands.push({
+    label: 'Ruby syntax: spaced formula',
+    command: 'ruby',
+    args: ['-c', 'Formula/needs care.rb'],
+    cwd: report.tap.root,
+    optional: true,
+    reason: 'Copy-pasteable path quoting.'
+  });
+
+  const markdown = renderReport(report, 'markdown');
+
+  assert.ok(markdown.includes("ruby -c 'Formula/needs care.rb'"));
+});
