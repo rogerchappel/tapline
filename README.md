@@ -24,6 +24,16 @@ npm run build
 node dist/cli.js inspect examples/fixtures/sample-tap --format markdown --output tapline-report.md
 ```
 
+For a self-checking walkthrough that prints the full fixture report:
+
+```sh
+bash examples/demo.sh
+```
+
+The demo verifies both the healthy formula and the deliberately incomplete
+formula without running Homebrew or publishing anything. See
+[examples/README.md](examples/README.md) for details.
+
 Run explicit local dry-run checks:
 
 ```sh
