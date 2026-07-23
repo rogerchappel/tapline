@@ -6,6 +6,21 @@ It is intentionally small, boring, and safe. No telemetry. No publishing. No sec
 
 ## Install
 
+Tapline is **not published to the npm registry**. The unscoped
+[`tapline`](https://www.npmjs.com/package/tapline) package belongs to an
+unrelated Homebrewing project; do not use `npm install tapline` or
+`npx tapline` for this project.
+
+Install a `.tgz` asset downloaded from this repository's
+[GitHub Releases](https://github.com/rogerchappel/tapline/releases):
+
+```sh
+npm install --global ./rogerchappel-tapline-<version>.tgz
+tapline --version
+```
+
+For local development, clone the repository and install its dependencies:
+
 ```sh
 npm install
 npm run build
@@ -72,6 +87,7 @@ npm test
 npm run check
 npm run build
 npm run smoke
+npm run package:smoke
 bash scripts/validate.sh
 ```
 
