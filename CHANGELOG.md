@@ -6,6 +6,15 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) an
 
 ## [Unreleased]
 
+### Changed
+
+- Adopt the non-colliding internal package identity `@rogerchappel/tapline`
+  and explicitly disable npm registry publication. GitHub release tarballs
+  are the supported distribution; the public unscoped `tapline` package is
+  unrelated.
+- Read the CLI version from `package.json` and verify the packed, installed
+  CLI reports the same version during release checks.
+
 ### Added
 
 - Local-first TypeScript CLI and library for Homebrew tap inspection.
