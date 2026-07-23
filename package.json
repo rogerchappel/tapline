@@ -1,6 +1,7 @@
 {
-  "name": "tapline",
+  "name": "@rogerchappel/tapline",
   "version": "0.1.0",
+  "private": true,
   "description": "Local-first Homebrew tap maintenance reports, dry-run checks, and release notes.",
   "type": "module",
   "bin": {
