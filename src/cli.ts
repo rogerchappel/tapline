@@ -1,6 +1,11 @@
 #!/usr/bin/env node
+import { readFileSync } from 'node:fs';
 import { createReport, renderReport, writeReport } from './index.js';
 import type { OutputFormat } from './types.js';
+
+const packageManifest = JSON.parse(
+  readFileSync(new URL('../package.json', import.meta.url), 'utf8')
+) as { version: string };
 
 interface CliOptions {
   command: 'inspect' | 'help' | 'version';
@@ -60,7 +65,7 @@ async function main(): Promise<void> {
     return;
   }
   if (options.command === 'version') {
-    console.log('0.1.0');
+    console.log(packageManifest.version);
     return;
   }
   const report = await createReport(options.tapPath!, { runCommands: options.runCommands, includeBrew: options.includeBrew });

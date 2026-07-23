@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
+import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
 function run(args) {
@@ -19,4 +20,11 @@ test('CLI smoke renders fixture report as JSON', async () => {
   const parsed = JSON.parse(result.stdout);
   assert.equal(parsed.tap.name, 'sample-tap');
   assert.equal(parsed.tap.formulae.length, 2);
+});
+
+test('CLI version matches the package manifest', async () => {
+  const manifest = JSON.parse(await readFile('package.json', 'utf8'));
+  const result = await run(['--version']);
+  assert.equal(result.code, 0, result.stderr);
+  assert.equal(result.stdout.trim(), manifest.version);
 });
