@@ -6,8 +6,16 @@ function firstMatch(source: string, pattern: RegExp): string | undefined {
   return source.match(pattern)?.[1];
 }
 
-function allMatches(source: string, pattern: RegExp): string[] {
-  return [...source.matchAll(pattern)].map((match) => match[1]).filter((value): value is string => Boolean(value));
+function quotedMatches(source: string, field: string): string[] {
+  const pattern = new RegExp(`^\\s*${field}\\s+(["'])((?:\\\\.|(?!\\1)[^\\r\\n])*)\\1`, 'gm');
+  return [...source.matchAll(pattern)].map((match) => {
+    const quote = match[1] ?? '"';
+    return (match[2] ?? '').replace(new RegExp(`\\\\([\\\\${quote}])`, 'g'), '$1');
+  });
+}
+
+function quotedValue(source: string, field: string): string | undefined {
+  return quotedMatches(source, field)[0];
 }
 
 export async function parseFormula(filePath: string, tapRoot: string): Promise<FormulaInfo> {
@@ -15,11 +23,11 @@ export async function parseFormula(filePath: string, tapRoot: string): Promise<F
   const name = path.basename(filePath, '.rb');
   const relativePath = path.relative(tapRoot, filePath);
   const className = firstMatch(source, /^class\s+([A-Za-z0-9_:]+)\s+<\s+Formula/m);
-  const desc = firstMatch(source, /^\s*desc\s+["']([^"']+)["']/m);
-  const homepage = firstMatch(source, /^\s*homepage\s+["']([^"']+)["']/m);
-  const url = firstMatch(source, /^\s*url\s+["']([^"']+)["']/m);
-  const sha256 = firstMatch(source, /^\s*sha256\s+["']([^"']+)["']/m);
-  const version = firstMatch(source, /^\s*version\s+["']([^"']+)["']/m) ?? url?.match(/v?(\d+\.\d+(?:\.\d+)?)/)?.[1];
+  const desc = quotedValue(source, 'desc');
+  const homepage = quotedValue(source, 'homepage');
+  const url = quotedValue(source, 'url');
+  const sha256 = quotedValue(source, 'sha256');
+  const version = quotedValue(source, 'version') ?? url?.match(/v?(\d+\.\d+(?:\.\d+)?)/)?.[1];
   return {
     name,
     path: filePath,
@@ -33,7 +41,7 @@ export async function parseFormula(filePath: string, tapRoot: string): Promise<F
     hasBottle: /\bbottle\s+do\b/.test(source),
     hasLivecheck: /\blivecheck\s+do\b/.test(source),
     hasTest: /\btest\s+do\b/.test(source),
-    dependencies: allMatches(source, /^\s*depends_on\s+["']([^"']+)["']/gm),
+    dependencies: quotedMatches(source, 'depends_on'),
     caveats: [
       ...(!desc ? ['missing desc'] : []),
       ...(!homepage ? ['missing homepage'] : []),
