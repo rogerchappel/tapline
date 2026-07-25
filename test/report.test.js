@@ -13,6 +13,7 @@ test('renderReport emits markdown by default', async () => {
   const report = await createReport('examples/fixtures/sample-tap', { now: new Date('2026-05-05T00:00:00Z') });
   const markdown = renderReport(report, 'markdown');
   assert.match(markdown, /# Tapline report: sample-tap/);
+  assert.match(markdown, /Bob's "tiny" fixture formula for tapline reports/);
   assert.match(markdown, /Explicit dry-run validation commands/);
 });
 
