@@ -1,5 +1,5 @@
 class HelloTapline < Formula
-  desc "Tiny fixture formula for tapline reports"
+  desc "Bob's \"tiny\" fixture formula for tapline reports"
   homepage "https://example.com/hello-tapline"
   url "https://example.com/hello-tapline-1.2.3.tar.gz"
   sha256 "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
