@@ -11,6 +11,7 @@ test('inspectTap parses formula metadata from fixtures', async () => {
   const hello = tap.formulae.find((formula) => formula.name === 'hello-tapline');
   assert.equal(hello.desc, 'Bob\'s "tiny" fixture formula for tapline reports');
   assert.equal(hello.version, '1.2.3');
+  assert.equal(hello.hasBottle, true);
   assert.equal(hello.hasLivecheck, true);
   assert.equal(hello.hasTest, true);
 
