@@ -19,7 +19,15 @@ test('CLI smoke renders fixture report as JSON', async () => {
   assert.equal(result.code, 0, result.stderr);
   const parsed = JSON.parse(result.stdout);
   assert.equal(parsed.tap.name, 'sample-tap');
-  assert.equal(parsed.tap.formulae.length, 2);
+  assert.equal(parsed.tap.formulae.length, 3);
+  const commented = parsed.tap.formulae.find((formula) => formula.name === 'commented-blocks');
+  assert.equal(commented.hasBottle, false);
+  assert.equal(commented.hasLivecheck, false);
+  assert.equal(commented.hasTest, false);
+  assert.ok(commented.caveats.includes('missing test block'));
+  assert.ok(parsed.checklist.some((item) => item.id === 'formula.commented-blocks.test' && item.status === 'warn'));
+  assert.match(parsed.releaseNotes, /Review \d+ checklist caution\(s\)/);
+  assert.doesNotMatch(parsed.releaseNotes, /found no required metadata blockers/);
 });
 
 test('CLI version matches the package manifest', async () => {

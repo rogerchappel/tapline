@@ -16,9 +16,11 @@ export function generateReleaseNotes(tap: TapInfo, checklist: ChecklistItem[]): 
     `- To do before release: ${blockers.length}`,
     '',
     '### Copy-paste maintainer note',
-    blockers.length === 0
-      ? 'Local tap inspection found no required metadata blockers. Review dry-run validation output before tagging or publishing.'
-      : `Resolve ${blockers.length} checklist blocker(s), then rerun tapline and Homebrew validation before release.`,
+    blockers.length > 0
+      ? `Resolve ${blockers.length} checklist blocker(s), then rerun tapline and Homebrew validation before release.`
+      : cautions.length > 0
+        ? `Review ${cautions.length} checklist caution(s), then review dry-run validation output before tagging or publishing.`
+        : 'Local tap inspection found no required metadata blockers or checklist cautions. Review dry-run validation output before tagging or publishing.',
     '',
     '_Generated locally by tapline. No network calls, publishing, or credentials are used by report generation._'
   ].join('\n');

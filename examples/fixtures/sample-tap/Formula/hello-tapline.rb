@@ -5,6 +5,10 @@ class HelloTapline < Formula
   sha256 "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
   license "MIT"
 
+  bottle do
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+  end
+
   livecheck do
     url :homepage
     regex(/hello-tapline[._-]v?(\d+(?:\.\d+)+)\.t/i)
