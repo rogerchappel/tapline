@@ -1,5 +1,11 @@
 export type OutputFormat = 'markdown' | 'json';
 
+export interface FormulaDependency {
+  name?: string;
+  platform?: string;
+  qualifiers: string[];
+}
+
 export interface FormulaInfo {
   name: string;
   path: string;
@@ -13,7 +19,7 @@ export interface FormulaInfo {
   hasBottle: boolean;
   hasLivecheck: boolean;
   hasTest: boolean;
-  dependencies: string[];
+  dependencies: FormulaDependency[];
   caveats: string[];
 }
 

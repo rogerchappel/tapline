@@ -5,6 +5,12 @@ class HelloTapline < Formula
   sha256 "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
   license "MIT"
 
+  depends_on "libyaml"
+  depends_on "pkg-config" => :build
+  depends_on "ruby" => [:build, :test]
+  depends_on macos: :ventura
+  # depends_on "commented-out"
+
   bottle do
     sha256 cellar: :any_skip_relocation, arm64_sequoia: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
   end
