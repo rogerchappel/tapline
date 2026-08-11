@@ -1,6 +1,6 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
-import type { FormulaInfo } from './types.js';
+import type { FormulaDependency, FormulaInfo } from './types.js';
 
 function firstMatch(source: string, pattern: RegExp): string | undefined {
   return source.match(pattern)?.[1];
@@ -16,6 +16,37 @@ function quotedMatches(source: string, field: string): string[] {
 
 function quotedValue(source: string, field: string): string | undefined {
   return quotedMatches(source, field)[0];
+}
+
+function unescapeQuoted(value: string, quote: string): string {
+  return value.replace(new RegExp(`\\\\([\\\\${quote}])`, 'g'), '$1');
+}
+
+function dependencyQualifiers(value: string): string[] {
+  const match = value.match(/^\s*=>\s*(.*?)(?:\s+#.*)?$/);
+  if (!match) return [];
+  const expression = match[1] ?? '';
+  const single = expression.match(/^:([A-Za-z0-9_]+)\s*$/);
+  if (single) return [single[1] ?? ''];
+  const list = expression.match(/^\[\s*((?::[A-Za-z0-9_]+\s*,\s*)*:[A-Za-z0-9_]+)\s*\]\s*$/);
+  return list ? [...(list[1] ?? '').matchAll(/:([A-Za-z0-9_]+)/g)].map((item) => item[1] ?? '') : [];
+}
+
+function dependencies(source: string): FormulaDependency[] {
+  const result: FormulaDependency[] = [];
+  const quoted = /^\s*depends_on\s+(["'])((?:\\.|(?!\1)[^\r\n])*)\1([^\r\n]*)$/gm;
+  for (const match of source.matchAll(quoted)) {
+    result.push({
+      name: unescapeQuoted(match[2] ?? '', match[1] ?? '"'),
+      qualifiers: dependencyQualifiers(match[3] ?? '')
+    });
+  }
+
+  const platform = /^\s*depends_on\s+([A-Za-z0-9_]+):\s*:([A-Za-z0-9_]+)\s*(?:#.*)?$/gm;
+  for (const match of source.matchAll(platform)) {
+    result.push({ platform: match[1] ?? '', qualifiers: [match[2] ?? ''] });
+  }
+  return result;
 }
 
 function executableSource(source: string): string {
@@ -91,7 +122,7 @@ export async function parseFormula(filePath: string, tapRoot: string): Promise<F
     hasBottle,
     hasLivecheck,
     hasTest,
-    dependencies: quotedMatches(source, 'depends_on'),
+    dependencies: dependencies(source),
     caveats: [
       ...(!desc ? ['missing desc'] : []),
       ...(!homepage ? ['missing homepage'] : []),

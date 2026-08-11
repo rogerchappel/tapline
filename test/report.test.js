@@ -17,7 +17,16 @@ test('renderReport emits markdown by default', async () => {
   const markdown = renderReport(report, 'markdown');
   assert.match(markdown, /# Tapline report: sample-tap/);
   assert.match(markdown, /Bob's "tiny" fixture formula for tapline reports/);
+  assert.match(markdown, /Dependencies: libyaml; pkg-config \(build\); ruby \(build, test\); macos \(ventura\)/);
   assert.match(markdown, /Explicit dry-run validation commands/);
+});
+
+test('renderReport preserves dependency details in JSON', async () => {
+  const report = await createReport('examples/fixtures/sample-tap', { now: new Date('2026-05-05T00:00:00Z') });
+  const json = JSON.parse(renderReport(report, 'json'));
+  const hello = json.tap.formulae.find((formula) => formula.name === 'hello-tapline');
+  assert.deepEqual(hello.dependencies.at(-1), { platform: 'macos', qualifiers: ['ventura'] });
+  assert.equal(hello.dependencies.some((dependency) => dependency.name === 'commented-out'), false);
 });
 
 test('renderReport shell-quotes validation paths with spaces', async () => {

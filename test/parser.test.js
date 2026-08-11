@@ -14,6 +14,12 @@ test('inspectTap parses formula metadata from fixtures', async () => {
   assert.equal(hello.hasBottle, true);
   assert.equal(hello.hasLivecheck, true);
   assert.equal(hello.hasTest, true);
+  assert.deepEqual(hello.dependencies, [
+    { name: 'libyaml', qualifiers: [] },
+    { name: 'pkg-config', qualifiers: ['build'] },
+    { name: 'ruby', qualifiers: ['build', 'test'] },
+    { platform: 'macos', qualifiers: ['ventura'] }
+  ]);
 
   const commented = tap.formulae.find((formula) => formula.name === 'commented-blocks');
   assert.equal(commented.hasBottle, false);

@@ -1,5 +1,10 @@
 import type { TaplineReport } from './types.js';
 
+function renderDependency(dependency: TaplineReport['tap']['formulae'][number]['dependencies'][number]): string {
+  const target = dependency.name ?? dependency.platform ?? 'unknown';
+  return dependency.qualifiers.length ? `${target} (${dependency.qualifiers.join(', ')})` : target;
+}
+
 function statusIcon(status: string): string {
   if (status === 'pass') return '✅';
   if (status === 'warn') return '⚠️';
@@ -15,7 +20,10 @@ export function renderMarkdown(report: TaplineReport): string {
     `Root: \`${tap.root}\``,
     '',
     '## Formulae',
-    ...(tap.formulae.length ? tap.formulae.map((f) => `- **${f.name}**${f.version ? ` ${f.version}` : ''} — ${f.desc ?? 'No desc'} (\`${f.relativePath}\`)`) : ['- None found.']),
+    ...(tap.formulae.length ? tap.formulae.flatMap((f) => [
+      `- **${f.name}**${f.version ? ` ${f.version}` : ''} — ${f.desc ?? 'No desc'} (\`${f.relativePath}\`)`,
+      ...(f.dependencies.length ? [`  - Dependencies: ${f.dependencies.map(renderDependency).join('; ')}`] : [])
+    ]) : ['- None found.']),
     '',
     '## Checklist',
     ...report.checklist.map((item) => `- ${statusIcon(item.status)} **${item.title}** — ${item.detail}`),

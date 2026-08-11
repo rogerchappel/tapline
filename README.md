@@ -63,11 +63,18 @@ node dist/cli.js inspect /path/to/homebrew-tap --run-checks --include-brew
 
 ## What it reports
 
-- Formula metadata (`desc`, `homepage`, `url`, `sha256`, inferred version).
+- Formula metadata (`desc`, `homepage`, `url`, `sha256`, inferred version, dependencies).
 - Missing test or livecheck blocks.
 - Git cleanliness when the tap is a Git repo.
 - Explicit validation commands such as `git status --short` and `ruby -c Formula/name.rb`.
 - Copy-paste release notes for maintainers.
+
+Dependency inspection recognizes static quoted formula names, optional symbol
+qualifiers (`depends_on "pkg-config" => :build` and symbol arrays such as
+`[:build, :test]`), and platform constraints such as
+`depends_on macos: :ventura`. Comments are ignored. Tapline deliberately does
+not evaluate Ruby, so computed dependency names, conditional expressions, and
+other dynamic declarations are not reported.
 
 ## Safety model
 
