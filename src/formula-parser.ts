@@ -49,6 +49,21 @@ function dependencies(source: string): FormulaDependency[] {
   return result;
 }
 
+function withoutRubyBlockComments(source: string): string {
+  let inBlockComment = false;
+  return source.split(/(?<=\n)/).map((line) => {
+    if (!inBlockComment && /^=begin(?:\s|$)/.test(line)) {
+      inBlockComment = true;
+      return line.endsWith('\n') ? '\n' : '';
+    }
+    if (inBlockComment) {
+      if (/^=end(?:\s|$)/.test(line)) inBlockComment = false;
+      return line.endsWith('\n') ? '\n' : '';
+    }
+    return line;
+  }).join('');
+}
+
 function executableSource(source: string): string {
   let result = '';
   let quote: "'" | '"' | undefined;
@@ -97,15 +112,16 @@ function hasBlock(source: string, block: 'bottle' | 'livecheck' | 'test'): boole
 
 export async function parseFormula(filePath: string, tapRoot: string): Promise<FormulaInfo> {
   const source = await fs.readFile(filePath, 'utf8');
+  const parsedSource = withoutRubyBlockComments(source);
   const name = path.basename(filePath, '.rb');
   const relativePath = path.relative(tapRoot, filePath);
-  const className = firstMatch(source, /^class\s+([A-Za-z0-9_:]+)\s+<\s+Formula/m);
-  const desc = quotedValue(source, 'desc');
-  const homepage = quotedValue(source, 'homepage');
-  const url = quotedValue(source, 'url');
-  const sha256 = quotedValue(source, 'sha256');
-  const version = quotedValue(source, 'version') ?? url?.match(/v?(\d+\.\d+(?:\.\d+)?)/)?.[1];
-  const code = executableSource(source);
+  const className = firstMatch(parsedSource, /^class\s+([A-Za-z0-9_:]+)\s+<\s+Formula/m);
+  const desc = quotedValue(parsedSource, 'desc');
+  const homepage = quotedValue(parsedSource, 'homepage');
+  const url = quotedValue(parsedSource, 'url');
+  const sha256 = quotedValue(parsedSource, 'sha256');
+  const version = quotedValue(parsedSource, 'version') ?? url?.match(/v?(\d+\.\d+(?:\.\d+)?)/)?.[1];
+  const code = executableSource(parsedSource);
   const hasBottle = hasBlock(code, 'bottle');
   const hasLivecheck = hasBlock(code, 'livecheck');
   const hasTest = hasBlock(code, 'test');
@@ -122,7 +138,7 @@ export async function parseFormula(filePath: string, tapRoot: string): Promise<F
     hasBottle,
     hasLivecheck,
     hasTest,
-    dependencies: dependencies(source),
+    dependencies: dependencies(parsedSource),
     caveats: [
       ...(!desc ? ['missing desc'] : []),
       ...(!homepage ? ['missing homepage'] : []),
