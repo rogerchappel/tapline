@@ -7,7 +7,7 @@ import { inspectTap } from '../dist/index.js';
 
 test('inspectTap parses formula metadata from fixtures', async () => {
   const tap = await inspectTap('examples/fixtures/sample-tap');
-  assert.equal(tap.formulae.length, 3);
+  assert.equal(tap.formulae.length, 4);
   const hello = tap.formulae.find((formula) => formula.name === 'hello-tapline');
   assert.equal(hello.desc, 'Bob\'s "tiny" fixture formula for tapline reports');
   assert.equal(hello.version, '1.2.3');
@@ -26,6 +26,23 @@ test('inspectTap parses formula metadata from fixtures', async () => {
   assert.equal(commented.hasLivecheck, false);
   assert.equal(commented.hasTest, false);
   assert.ok(commented.caveats.includes('missing test block'));
+});
+
+test('inspectTap ignores Ruby block-comment declarations', async () => {
+  const tap = await inspectTap('examples/fixtures/sample-tap');
+  const formula = tap.formulae.find((item) => item.name === 'ruby-block-comment');
+  assert.equal(formula.desc, 'Declarations outside comments remain visible');
+  assert.equal(formula.homepage, 'https://example.com/ruby-block-comment');
+  assert.equal(formula.url, 'https://example.com/ruby-block-comment-1.2.3.tar.gz');
+  assert.equal(formula.version, '1.2.3');
+  assert.deepEqual(formula.dependencies, [
+    { name: 'visible-before', qualifiers: [] },
+    { name: 'visible-after', qualifiers: [] }
+  ]);
+  assert.equal(formula.hasBottle, false);
+  assert.equal(formula.hasLivecheck, false);
+  assert.equal(formula.hasTest, false);
+  assert.ok(formula.caveats.includes('missing test block'));
 });
 
 test('inspectTap requires matching quote delimiters for string metadata', async (t) => {
