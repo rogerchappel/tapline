@@ -76,6 +76,10 @@ qualifiers (`depends_on "pkg-config" => :build` and symbol arrays such as
 not evaluate Ruby, so computed dependency names, conditional expressions, and
 other dynamic declarations are not reported.
 
+Ruby block comments are ignored when their `=begin` and `=end` markers start
+at the beginning of a line, as Ruby requires. Indented markers and marker-like
+text inside strings are not treated as block-comment delimiters.
+
 ## Safety model
 
 - `tapline inspect` is read-only by default.

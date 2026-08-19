@@ -19,7 +19,7 @@ test('CLI smoke renders fixture report as JSON', async () => {
   assert.equal(result.code, 0, result.stderr);
   const parsed = JSON.parse(result.stdout);
   assert.equal(parsed.tap.name, 'sample-tap');
-  assert.equal(parsed.tap.formulae.length, 3);
+  assert.equal(parsed.tap.formulae.length, 4);
   const commented = parsed.tap.formulae.find((formula) => formula.name === 'commented-blocks');
   assert.equal(commented.hasBottle, false);
   assert.equal(commented.hasLivecheck, false);
