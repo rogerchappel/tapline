@@ -61,6 +61,9 @@ Include Homebrew audit commands only when you ask for them:
 node dist/cli.js inspect /path/to/homebrew-tap --run-checks --include-brew
 ```
 
+The tap path must immediately follow `inspect`. Options may follow in any order;
+`--format` and `--output` (or `-o`) each require a non-option value.
+
 ## What it reports
 
 - Formula metadata (`desc`, `homepage`, `url`, `sha256`, inferred version, dependencies).
