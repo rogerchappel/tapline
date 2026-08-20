@@ -33,7 +33,7 @@ function parse(argv: string[]): CliOptions {
   if (argv.includes('--help') || argv.includes('-h') || argv.length === 0) return { command: 'help', format: 'markdown', runCommands: false, includeBrew: false };
   if (argv.includes('--version')) return { command: 'version', format: 'markdown', runCommands: false, includeBrew: false };
   const [command, tapPath, ...rest] = argv;
-  if (command !== 'inspect' || !tapPath) throw new Error('Expected: tapline inspect <tap-path>');
+  if (command !== 'inspect' || !tapPath || tapPath.startsWith('-')) throw new Error('Expected: tapline inspect <tap-path>');
   let format: OutputFormat = 'markdown';
   let output: string | undefined;
   let runCommands = false;
@@ -42,11 +42,12 @@ function parse(argv: string[]): CliOptions {
     const arg = rest[i];
     if (arg === '--format') {
       const next = rest[++i];
+      if (!next || next.startsWith('-')) throw new Error('--format requires markdown or json');
       if (next !== 'markdown' && next !== 'json') throw new Error('--format must be markdown or json');
       format = next;
     } else if (arg === '--output' || arg === '-o') {
       output = rest[++i];
-      if (!output) throw new Error('--output requires a file path');
+      if (!output || output.startsWith('-')) throw new Error(`${arg} requires a file path`);
     } else if (arg === '--run-checks') {
       runCommands = true;
     } else if (arg === '--include-brew') {
