@@ -28,6 +28,19 @@ test('inspectTap parses formula metadata from fixtures', async () => {
   assert.ok(commented.caveats.includes('missing test block'));
 });
 
+test('inspectTap ignores block-like text in Ruby heredocs', async () => {
+  const tap = await inspectTap('examples/fixtures/heredoc-tap');
+  const misleading = tap.formulae.find((formula) => formula.name === 'heredoc-only');
+  assert.equal(misleading.hasBottle, false);
+  assert.equal(misleading.hasLivecheck, false);
+  assert.equal(misleading.hasTest, false);
+
+  const adjacent = tap.formulae.find((formula) => formula.name === 'heredoc-adjacent');
+  assert.equal(adjacent.hasBottle, true);
+  assert.equal(adjacent.hasLivecheck, true);
+  assert.equal(adjacent.hasTest, true);
+});
+
 test('inspectTap ignores Ruby block-comment declarations', async () => {
   const tap = await inspectTap('examples/fixtures/sample-tap');
   const formula = tap.formulae.find((item) => item.name === 'ruby-block-comment');
