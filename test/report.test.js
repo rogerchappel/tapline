@@ -12,6 +12,13 @@ test('createReport builds checklist, commands, and release notes', async () => {
   assert.doesNotMatch(report.releaseNotes, /found no required metadata blockers/);
 });
 
+test('createReport renders heredoc-only block text as missing', async () => {
+  const report = await createReport('examples/fixtures/heredoc-tap', { now: new Date('2026-05-05T00:00:00Z') });
+  const markdown = renderReport(report, 'markdown');
+  assert.ok(report.checklist.some((item) => item.id === 'formula.heredoc-only.test' && item.status === 'warn'));
+  assert.match(markdown, /heredoc-only: test block.*Add a test do block/s);
+});
+
 test('renderReport emits markdown by default', async () => {
   const report = await createReport('examples/fixtures/sample-tap', { now: new Date('2026-05-05T00:00:00Z') });
   const markdown = renderReport(report, 'markdown');
