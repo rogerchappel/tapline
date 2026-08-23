@@ -83,6 +83,10 @@ Ruby block comments are ignored when their `=begin` and `=end` markers start
 at the beginning of a line, as Ruby requires. Indented markers and marker-like
 text inside strings are not treated as block-comment delimiters.
 
+Bottle, livecheck, and test detection also ignores Ruby heredoc bodies,
+including quoted terminators and indented `<<-` or `<<~` forms. This remains
+static analysis: Tapline does not execute Ruby to discover generated blocks.
+
 ## Safety model
 
 - `tapline inspect` is read-only by default.
