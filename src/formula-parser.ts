@@ -106,6 +106,30 @@ function executableSource(source: string): string {
   return result;
 }
 
+function withoutRubyHeredocs(source: string): string {
+  const pending: Array<{ terminator: string; indented: boolean }> = [];
+  return source.split(/(?<=\n)/).map((line) => {
+    const active = pending[0];
+    if (active) {
+      const content = line.replace(/[\r\n]+$/, '');
+      const candidate = active.indented ? content.trimStart() : content;
+      if (candidate === active.terminator) pending.shift();
+      return line.endsWith('\n') ? '\n' : '';
+    }
+
+    const code = executableSource(line);
+    const pattern = /<<([~-]?)(?:'([^']+)'|"([^"]+)"|`([^`]+)`|([A-Za-z_][A-Za-z0-9_]*))/g;
+    for (const match of line.matchAll(pattern)) {
+      if (match.index === undefined || code.slice(match.index, match.index + 2) !== '<<') continue;
+      pending.push({
+        terminator: match[2] ?? match[3] ?? match[4] ?? match[5] ?? '',
+        indented: match[1] === '-' || match[1] === '~'
+      });
+    }
+    return line;
+  }).join('');
+}
+
 function hasBlock(source: string, block: 'bottle' | 'livecheck' | 'test'): boolean {
   return new RegExp(`^\\s*${block}\\s+do\\b`, 'm').test(source);
 }
@@ -121,7 +145,7 @@ export async function parseFormula(filePath: string, tapRoot: string): Promise<F
   const url = quotedValue(parsedSource, 'url');
   const sha256 = quotedValue(parsedSource, 'sha256');
   const version = quotedValue(parsedSource, 'version') ?? url?.match(/v?(\d+\.\d+(?:\.\d+)?)/)?.[1];
-  const code = executableSource(parsedSource);
+  const code = executableSource(withoutRubyHeredocs(parsedSource));
   const hasBottle = hasBlock(code, 'bottle');
   const hasLivecheck = hasBlock(code, 'livecheck');
   const hasTest = hasBlock(code, 'test');
