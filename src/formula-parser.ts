@@ -136,7 +136,7 @@ function hasBlock(source: string, block: 'bottle' | 'livecheck' | 'test'): boole
 
 export async function parseFormula(filePath: string, tapRoot: string): Promise<FormulaInfo> {
   const source = await fs.readFile(filePath, 'utf8');
-  const parsedSource = withoutRubyBlockComments(source);
+  const parsedSource = withoutRubyHeredocs(withoutRubyBlockComments(source));
   const name = path.basename(filePath, '.rb');
   const relativePath = path.relative(tapRoot, filePath);
   const className = firstMatch(parsedSource, /^class\s+([A-Za-z0-9_:]+)\s+<\s+Formula/m);
@@ -145,7 +145,7 @@ export async function parseFormula(filePath: string, tapRoot: string): Promise<F
   const url = quotedValue(parsedSource, 'url');
   const sha256 = quotedValue(parsedSource, 'sha256');
   const version = quotedValue(parsedSource, 'version') ?? url?.match(/v?(\d+\.\d+(?:\.\d+)?)/)?.[1];
-  const code = executableSource(withoutRubyHeredocs(parsedSource));
+  const code = executableSource(parsedSource);
   const hasBottle = hasBlock(code, 'bottle');
   const hasLivecheck = hasBlock(code, 'livecheck');
   const hasTest = hasBlock(code, 'test');
