@@ -39,6 +39,20 @@ test('inspectTap ignores block-like text in Ruby heredocs', async () => {
   assert.equal(adjacent.hasBottle, true);
   assert.equal(adjacent.hasLivecheck, true);
   assert.equal(adjacent.hasTest, true);
+
+  const metadata = tap.formulae.find((formula) => formula.name === 'heredoc-metadata');
+  assert.equal(metadata.desc, 'Declarations around heredocs remain visible');
+  assert.equal(metadata.homepage, 'https://example.com/heredoc-metadata');
+  assert.equal(metadata.url, 'https://example.com/heredoc-metadata-1.2.3.tar.gz');
+  assert.equal(metadata.sha256, 'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc');
+  assert.equal(metadata.version, '1.2.3');
+  assert.deepEqual(metadata.dependencies, [
+    { name: 'visible-before', qualifiers: ['build'] },
+    { name: 'visible-after', qualifiers: [] }
+  ]);
+  assert.equal(metadata.hasBottle, true);
+  assert.equal(metadata.hasLivecheck, true);
+  assert.equal(metadata.hasTest, true);
 });
 
 test('inspectTap ignores Ruby block-comment declarations', async () => {

@@ -17,6 +17,12 @@ test('createReport renders heredoc-only block text as missing', async () => {
   const markdown = renderReport(report, 'markdown');
   assert.ok(report.checklist.some((item) => item.id === 'formula.heredoc-only.test' && item.status === 'warn'));
   assert.match(markdown, /heredoc-only: test block.*Add a test do block/s);
+
+  const json = JSON.parse(renderReport(report, 'json'));
+  const metadata = json.tap.formulae.find((formula) => formula.name === 'heredoc-metadata');
+  assert.equal(metadata.desc, 'Declarations around heredocs remain visible');
+  assert.deepEqual(metadata.dependencies.map((dependency) => dependency.name), ['visible-before', 'visible-after']);
+  assert.doesNotMatch(markdown, /Misleading|phantom-|wrong\.example/);
 });
 
 test('renderReport emits markdown by default', async () => {
