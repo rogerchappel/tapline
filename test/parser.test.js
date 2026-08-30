@@ -72,6 +72,18 @@ test('inspectTap ignores Ruby block-comment declarations', async () => {
   assert.ok(formula.caveats.includes('missing test block'));
 });
 
+test('inspectTap ignores declarations inside multiline Ruby percent literals', async () => {
+  const tap = await inspectTap('examples/fixtures/heredoc-tap');
+  const formula = tap.formulae.find((item) => item.name === 'percent-literals');
+  assert.deepEqual(formula.dependencies, [
+    { name: 'visible', qualifiers: ['build'] },
+    { platform: 'macos', qualifiers: ['ventura'] }
+  ]);
+  assert.equal(formula.hasBottle, true);
+  assert.equal(formula.hasLivecheck, true);
+  assert.equal(formula.hasTest, true);
+});
+
 test('inspectTap requires matching quote delimiters for string metadata', async (t) => {
   const tapRoot = await mkdtemp(path.join(tmpdir(), 'tapline-quotes-'));
   t.after(() => rm(tapRoot, { recursive: true, force: true }));
