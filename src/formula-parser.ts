@@ -32,10 +32,12 @@ function dependencyQualifiers(value: string): string[] {
   return list ? [...(list[1] ?? '').matchAll(/:([A-Za-z0-9_]+)/g)].map((item) => item[1] ?? '') : [];
 }
 
-function dependencies(source: string): FormulaDependency[] {
+function dependencies(source: string, executable: string): FormulaDependency[] {
   const result: FormulaDependency[] = [];
   const quoted = /^\s*depends_on\s+(["'])((?:\\.|(?!\1)[^\r\n])*)\1([^\r\n]*)$/gm;
   for (const match of source.matchAll(quoted)) {
+    const keyword = (match.index ?? 0) + (match[0]?.indexOf('depends_on') ?? 0);
+    if (executable.slice(keyword, keyword + 'depends_on'.length) !== 'depends_on') continue;
     result.push({
       name: unescapeQuoted(match[2] ?? '', match[1] ?? '"'),
       qualifiers: dependencyQualifiers(match[3] ?? '')
@@ -44,6 +46,8 @@ function dependencies(source: string): FormulaDependency[] {
 
   const platform = /^\s*depends_on\s+([A-Za-z0-9_]+):\s*:([A-Za-z0-9_]+)\s*(?:#.*)?$/gm;
   for (const match of source.matchAll(platform)) {
+    const keyword = (match.index ?? 0) + (match[0]?.indexOf('depends_on') ?? 0);
+    if (executable.slice(keyword, keyword + 'depends_on'.length) !== 'depends_on') continue;
     result.push({ platform: match[1] ?? '', qualifiers: [match[2] ?? ''] });
   }
   return result;
@@ -67,7 +71,9 @@ function withoutRubyBlockComments(source: string): string {
 function executableSource(source: string): string {
   let result = '';
   let quote: "'" | '"' | undefined;
+  let percentLiteral: { opener: string; closer: string; depth: number } | undefined;
   let comment = false;
+  const pairedDelimiters: Record<string, string> = { '(': ')', '[': ']', '{': '}', '<': '>' };
 
   for (let index = 0; index < source.length; index += 1) {
     const character = source[index] ?? '';
@@ -78,6 +84,21 @@ function executableSource(source: string): string {
     }
     if (comment) {
       result += ' ';
+      continue;
+    }
+    if (percentLiteral) {
+      result += ' ';
+      if (character === '\\') {
+        if (index + 1 < source.length && source[index + 1] !== '\n' && source[index + 1] !== '\r') {
+          result += ' ';
+          index += 1;
+        }
+      } else if (character === percentLiteral.opener && percentLiteral.opener !== percentLiteral.closer) {
+        percentLiteral.depth += 1;
+      } else if (character === percentLiteral.closer) {
+        percentLiteral.depth -= 1;
+        if (percentLiteral.depth === 0) percentLiteral = undefined;
+      }
       continue;
     }
     if (quote) {
@@ -92,7 +113,18 @@ function executableSource(source: string): string {
       }
       continue;
     }
-    if (character === '#') {
+    const percentType = source[index + 1];
+    const percentDelimiter = source[index + 2];
+    if (character === '%' && (percentType === 'q' || percentType === 'Q') &&
+        percentDelimiter && !/[A-Za-z0-9\s]/.test(percentDelimiter)) {
+      percentLiteral = {
+        opener: percentDelimiter,
+        closer: pairedDelimiters[percentDelimiter] ?? percentDelimiter,
+        depth: 1
+      };
+      result += '   ';
+      index += 2;
+    } else if (character === '#') {
       comment = true;
       result += ' ';
     } else if (character === "'" || character === '"') {
@@ -162,7 +194,7 @@ export async function parseFormula(filePath: string, tapRoot: string): Promise<F
     hasBottle,
     hasLivecheck,
     hasTest,
-    dependencies: dependencies(parsedSource),
+    dependencies: dependencies(parsedSource, code),
     caveats: [
       ...(!desc ? ['missing desc'] : []),
       ...(!homepage ? ['missing homepage'] : []),
