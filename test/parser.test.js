@@ -75,6 +75,11 @@ test('inspectTap ignores Ruby block-comment declarations', async () => {
 test('inspectTap ignores declarations inside multiline Ruby percent literals', async () => {
   const tap = await inspectTap('examples/fixtures/heredoc-tap');
   const formula = tap.formulae.find((item) => item.name === 'percent-literals');
+  assert.equal(formula.desc, 'Percent literal analysis fixture');
+  assert.equal(formula.homepage, 'https://example.com/percent-literals');
+  assert.equal(formula.url, 'https://example.com/percent-literals-1.2.3.tar.gz');
+  assert.equal(formula.sha256, 'dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd');
+  assert.equal(formula.version, '1.2.3');
   assert.deepEqual(formula.dependencies, [
     { name: 'visible', qualifiers: ['build'] },
     { platform: 'macos', qualifiers: ['ventura'] }
