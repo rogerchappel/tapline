@@ -87,8 +87,9 @@ Metadata, dependency, bottle, livecheck, and test inspection ignores Ruby
 heredoc bodies, including quoted or unquoted terminators, indented `<<-` and
 `<<~` forms, and multiple heredocs opened on one line. Genuine static
 declarations immediately before or after a heredoc remain visible. Dependency
-and block inspection also ignores multiline `%q` and `%Q` string bodies,
-including nested paired delimiters, while preserving adjacent declarations.
+Metadata (including derived versions), dependency, and block inspection share
+the same boundary for multiline `%q` and `%Q` string bodies, including nested
+paired delimiters, while preserving adjacent declarations.
 This is still static analysis: Tapline does not execute Ruby to discover
 computed metadata, dependencies, or generated blocks, and other Ruby literal
 forms may remain outside the recognized boundary.
