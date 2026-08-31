@@ -102,10 +102,10 @@ function executableSource(source: string): string {
       continue;
     }
     if (quote) {
-      result += ' ';
+      result += character;
       if (character === '\\') {
         if (index + 1 < source.length && source[index + 1] !== '\n' && source[index + 1] !== '\r') {
-          result += ' ';
+          result += source[index + 1];
           index += 1;
         }
       } else if (character === quote) {
@@ -129,7 +129,7 @@ function executableSource(source: string): string {
       result += ' ';
     } else if (character === "'" || character === '"') {
       quote = character;
-      result += ' ';
+      result += character;
     } else {
       result += character;
     }
@@ -169,15 +169,15 @@ function hasBlock(source: string, block: 'bottle' | 'livecheck' | 'test'): boole
 export async function parseFormula(filePath: string, tapRoot: string): Promise<FormulaInfo> {
   const source = await fs.readFile(filePath, 'utf8');
   const parsedSource = withoutRubyHeredocs(withoutRubyBlockComments(source));
+  const code = executableSource(parsedSource);
   const name = path.basename(filePath, '.rb');
   const relativePath = path.relative(tapRoot, filePath);
-  const className = firstMatch(parsedSource, /^class\s+([A-Za-z0-9_:]+)\s+<\s+Formula/m);
-  const desc = quotedValue(parsedSource, 'desc');
-  const homepage = quotedValue(parsedSource, 'homepage');
-  const url = quotedValue(parsedSource, 'url');
-  const sha256 = quotedValue(parsedSource, 'sha256');
-  const version = quotedValue(parsedSource, 'version') ?? url?.match(/v?(\d+\.\d+(?:\.\d+)?)/)?.[1];
-  const code = executableSource(parsedSource);
+  const className = firstMatch(code, /^class\s+([A-Za-z0-9_:]+)\s+<\s+Formula/m);
+  const desc = quotedValue(code, 'desc');
+  const homepage = quotedValue(code, 'homepage');
+  const url = quotedValue(code, 'url');
+  const sha256 = quotedValue(code, 'sha256');
+  const version = quotedValue(code, 'version') ?? url?.match(/v?(\d+\.\d+(?:\.\d+)?)/)?.[1];
   const hasBottle = hasBlock(code, 'bottle');
   const hasLivecheck = hasBlock(code, 'livecheck');
   const hasTest = hasBlock(code, 'test');
@@ -194,7 +194,7 @@ export async function parseFormula(filePath: string, tapRoot: string): Promise<F
     hasBottle,
     hasLivecheck,
     hasTest,
-    dependencies: dependencies(parsedSource, code),
+    dependencies: dependencies(code, code),
     caveats: [
       ...(!desc ? ['missing desc'] : []),
       ...(!homepage ? ['missing homepage'] : []),
