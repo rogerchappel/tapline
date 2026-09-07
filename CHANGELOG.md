@@ -8,6 +8,10 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) an
 
 ### Changed
 
+- Infer missing formula versions only from defensible archive filenames or
+  conventional tag URL segments, while keeping explicit `version` declarations
+  authoritative.
+
 - Adopt the non-colliding internal package identity `@rogerchappel/tapline`
   and explicitly disable npm registry publication. GitHub release tarballs
   are the supported distribution; the public unscoped `tapline` package is
