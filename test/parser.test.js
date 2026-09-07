@@ -34,6 +34,7 @@ test('inspectTap infers versions only from defensible archive and tag names', as
 
   assert.equal(versions['archive-path'], '3.4.5');
   assert.equal(versions['github-tag'], '2.7.1');
+  assert.equal(versions['release-download'], '5.6.0');
   assert.equal(versions['explicit-version'], '4.2.0');
   assert.equal(versions['no-version'], undefined);
 });

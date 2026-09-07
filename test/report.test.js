@@ -22,6 +22,7 @@ test('derived versions agree across report formats and release notes', async () 
   assert.match(markdown, /archive-path.*3\.4\.5/);
   assert.doesNotMatch(markdown, /no-version 1\.2/);
   assert.match(report.releaseNotes, /archive-path 3\.4\.5/);
+  assert.match(report.releaseNotes, /release-download 5\.6\.0/);
   assert.doesNotMatch(report.releaseNotes, /no-version 1\.2/);
 });
 
