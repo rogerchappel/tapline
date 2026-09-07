@@ -12,6 +12,19 @@ test('createReport builds checklist, commands, and release notes', async () => {
   assert.doesNotMatch(report.releaseNotes, /found no required metadata blockers/);
 });
 
+test('derived versions agree across report formats and release notes', async () => {
+  const report = await createReport('examples/fixtures/version-inference-tap', { now: new Date('2026-05-05T00:00:00Z') });
+  const markdown = renderReport(report, 'markdown');
+  const json = JSON.parse(renderReport(report, 'json'));
+
+  assert.equal(json.tap.formulae.find((formula) => formula.name === 'archive-path').version, '3.4.5');
+  assert.equal(json.tap.formulae.find((formula) => formula.name === 'no-version').version, undefined);
+  assert.match(markdown, /archive-path.*3\.4\.5/);
+  assert.doesNotMatch(markdown, /no-version 1\.2/);
+  assert.match(report.releaseNotes, /archive-path 3\.4\.5/);
+  assert.doesNotMatch(report.releaseNotes, /no-version 1\.2/);
+});
+
 test('createReport renders heredoc-only block text as missing', async () => {
   const report = await createReport('examples/fixtures/heredoc-tap', { now: new Date('2026-05-05T00:00:00Z') });
   const markdown = renderReport(report, 'markdown');
