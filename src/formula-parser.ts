@@ -18,6 +18,31 @@ function quotedValue(source: string, field: string): string | undefined {
   return quotedMatches(source, field)[0];
 }
 
+function inferredVersion(url: string | undefined): string | undefined {
+  if (!url) return undefined;
+  let segments: string[];
+  try {
+    segments = new URL(url).pathname.split('/').filter(Boolean).map((segment) => decodeURIComponent(segment));
+  } catch {
+    return undefined;
+  }
+
+  const versionFrom = (value: string): string | undefined =>
+    value.match(/(?:^|[-_.])v?(\d+\.\d+(?:\.\d+)?)(?=$|[-_.])/i)?.[1];
+  const artifactVersion = versionFrom(segments.at(-1) ?? '');
+  if (artifactVersion) return artifactVersion;
+
+  for (let index = segments.length - 1; index >= 0; index -= 1) {
+    const parent = segments[index - 1];
+    const grandparent = segments[index - 2];
+    if (parent === 'tags' || parent === 'download' || (parent === 'tags' && grandparent === 'refs')) {
+      const tagVersion = segments[index]?.match(/^v?(\d+\.\d+(?:\.\d+)?)$/i)?.[1];
+      if (tagVersion) return tagVersion;
+    }
+  }
+  return undefined;
+}
+
 function unescapeQuoted(value: string, quote: string): string {
   return value.replace(new RegExp(`\\\\([\\\\${quote}])`, 'g'), '$1');
 }
@@ -177,7 +202,7 @@ export async function parseFormula(filePath: string, tapRoot: string): Promise<F
   const homepage = quotedValue(code, 'homepage');
   const url = quotedValue(code, 'url');
   const sha256 = quotedValue(code, 'sha256');
-  const version = quotedValue(code, 'version') ?? url?.match(/v?(\d+\.\d+(?:\.\d+)?)/)?.[1];
+  const version = quotedValue(code, 'version') ?? inferredVersion(url);
   const hasBottle = hasBlock(code, 'bottle');
   const hasLivecheck = hasBlock(code, 'livecheck');
   const hasTest = hasBlock(code, 'test');
