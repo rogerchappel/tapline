@@ -28,6 +28,17 @@ test('inspectTap parses formula metadata from fixtures', async () => {
   assert.ok(commented.caveats.includes('missing test block'));
 });
 
+test('inspectTap infers versions only from defensible archive and tag names', async () => {
+  const tap = await inspectTap('examples/fixtures/version-inference-tap');
+  const versions = Object.fromEntries(tap.formulae.map((formula) => [formula.name, formula.version]));
+
+  assert.equal(versions['archive-path'], '3.4.5');
+  assert.equal(versions['github-tag'], '2.7.1');
+  assert.equal(versions['release-download'], '5.6.0');
+  assert.equal(versions['explicit-version'], '4.2.0');
+  assert.equal(versions['no-version'], undefined);
+});
+
 test('inspectTap ignores block-like text in Ruby heredocs', async () => {
   const tap = await inspectTap('examples/fixtures/heredoc-tap');
   const misleading = tap.formulae.find((formula) => formula.name === 'heredoc-only');

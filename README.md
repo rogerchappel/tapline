@@ -72,6 +72,12 @@ The tap path must immediately follow `inspect`. Options may follow in any order;
 - Explicit validation commands such as `git status --short` and `ruby -c Formula/name.rb`.
 - Copy-paste release notes for maintainers.
 
+When a formula declares `version`, Tapline reports that value unchanged. If it
+is absent, Tapline derives a version only from a versioned archive filename
+(`tool-1.2.3.tar.gz`) or a conventional tag segment such as
+`archive/refs/tags/v1.2.3` or `releases/download/v1.2.3`. Other semver-like URL
+path segments are ignored rather than guessed.
+
 Dependency inspection recognizes static quoted formula names, optional symbol
 qualifiers (`depends_on "pkg-config" => :build` and symbol arrays such as
 `[:build, :test]`), and platform constraints such as
