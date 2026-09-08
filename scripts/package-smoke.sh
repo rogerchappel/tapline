@@ -18,7 +18,7 @@ package_file="$(npm pack --pack-destination "$package_dir" --json | node -e "
 
 node - "$package_dir/$package_file" <<'NODE'
 const { execFileSync } = require('node:child_process');
-const { mkdtempSync, readFileSync } = require('node:fs');
+const { mkdtempSync, readFileSync, rmSync } = require('node:fs');
 const { tmpdir } = require('node:os');
 const { join } = require('node:path');
 
@@ -35,22 +35,26 @@ if (manifest.private !== true) {
 }
 
 const installDir = mkdtempSync(join(tmpdir(), 'tapline-install.'));
-execFileSync('npm', ['init', '--yes'], { cwd: installDir, stdio: 'ignore' });
-execFileSync('npm', ['install', '--ignore-scripts', tarball], { cwd: installDir, stdio: 'ignore' });
+try {
+  execFileSync('npm', ['init', '--yes'], { cwd: installDir, stdio: 'ignore' });
+  execFileSync('npm', ['install', '--ignore-scripts', tarball], { cwd: installDir, stdio: 'ignore' });
 
-const installedManifest = JSON.parse(
-  readFileSync(join(installDir, 'node_modules/@rogerchappel/tapline/package.json'), 'utf8')
-);
-const output = execFileSync(
-  process.execPath,
-  [join(installDir, 'node_modules/@rogerchappel/tapline/dist/cli.js'), '--version'],
-  { encoding: 'utf8' }
-).trim();
-
-if (installedManifest.version !== manifest.version || output !== manifest.version) {
-  throw new Error(
-    `version mismatch: packed=${manifest.version}, installed=${installedManifest.version}, cli=${output}`
+  const installedManifest = JSON.parse(
+    readFileSync(join(installDir, 'node_modules/@rogerchappel/tapline/package.json'), 'utf8')
   );
+  const output = execFileSync(
+    process.execPath,
+    [join(installDir, 'node_modules/@rogerchappel/tapline/dist/cli.js'), '--version'],
+    { encoding: 'utf8' }
+  ).trim();
+
+  if (installedManifest.version !== manifest.version || output !== manifest.version) {
+    throw new Error(
+      `version mismatch: packed=${manifest.version}, installed=${installedManifest.version}, cli=${output}`
+    );
+  }
+} finally {
+  rmSync(installDir, { recursive: true, force: true });
 }
 NODE
 

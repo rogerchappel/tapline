@@ -28,9 +28,10 @@
     "check": "tsc --noEmit",
     "build": "tsc",
     "test": "npm run build && node --test test/*.test.js",
-    "smoke": "npm run build && node dist/cli.js inspect examples/fixtures/sample-tap --format markdown --output /tmp/tapline-smoke.md && test -s /tmp/tapline-smoke.md",
+    "smoke": "bash scripts/smoke.sh",
     "package:smoke": "bash scripts/package-smoke.sh",
-    "release:check": "npm run check && npm test && npm run smoke && npm run package:smoke"
+    "smoke:cleanup": "bash scripts/smoke-cleanup.sh",
+    "release:check": "npm run check && npm test && npm run smoke:cleanup"
   },
   "keywords": [
     "homebrew",
