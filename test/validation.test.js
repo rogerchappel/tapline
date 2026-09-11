@@ -30,7 +30,7 @@ function fixtureTap(overrides = {}) {
 test('plans tap-qualified name-form brew audits when the tap is installed', async () => {
   const prefix = await mkdtemp(path.join(tmpdir(), 'tapline-brew-prefix-'));
   try {
-    await mkdir(path.join(prefix, 'Library', 'Taps', 'acme'), { recursive: true });
+    await mkdir(path.join(prefix, 'Library', 'Taps', 'acme', 'homebrew-demo'), { recursive: true });
     const tap = fixtureTap({
       git: { isRepository: true, dirty: false, statusLines: [], remoteUrls: ['git@github.com:acme/homebrew-demo.git'] }
     });
@@ -39,7 +39,7 @@ test('plans tap-qualified name-form brew audits when the tap is installed', asyn
     assert.equal(audits.length, 1);
     assert.deepEqual(audits[0].args, ['audit', '--strict', '--formula', 'acme/demo/hello-tapline']);
     assert.equal(audits[0].skipReason, undefined);
-    assert.match(audits[0].reason, /name-based/);
+    assert.match(audits[0].reason, /Name-based audits/);
   } finally {
     await rm(prefix, { recursive: true, force: true });
   }

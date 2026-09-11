@@ -54,6 +54,8 @@ export interface ValidationCommand {
   cwd: string;
   optional: boolean;
   reason: string;
+  /** Present when the command is intentionally not executed; explains why and what to do instead. */
+  skipReason?: string;
 }
 
 export interface CommandResult extends ValidationCommand {
