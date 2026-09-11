@@ -6,6 +6,19 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) an
 
 ## [Unreleased]
 
+### Fixed
+
+- Plan `--include-brew` audits only in forms the current Homebrew CLI accepts:
+  fully qualified name-form audits for locally installed taps resolved from
+  GitHub `homebrew-*` remotes, and explicit skips with actionable `brew tap`
+  reasons otherwise. This replaces the disabled `brew audit [path ...]` form,
+  which failed on every modern Homebrew installation.
+
+### Changed
+
+- Markdown reports now show skip reasons for skipped validation commands
+  instead of a bare "command unavailable".
+
 ### Changed
 
 - Infer missing formula versions only from defensible archive filenames or

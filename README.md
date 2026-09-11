@@ -61,6 +61,13 @@ Include Homebrew audit commands only when you ask for them:
 node dist/cli.js inspect /path/to/homebrew-tap --run-checks --include-brew
 ```
 
+Modern Homebrew disabled `brew audit [path ...]`, so Tapline plans audits by
+fully qualified formula name instead. When the tap has a GitHub `homebrew-*`
+remote and is installed locally (`<prefix>/Library/Taps/<owner>/<repo>`), the
+planned command is `brew audit --strict --formula <owner>/<tap>/<formula>`.
+Otherwise the audit is reported as `SKIP` with an actionable `brew tap ...`
+reason instead of a guaranteed `FAIL`.
+
 The tap path must immediately follow `inspect`. Options may follow in any order;
 `--format` and `--output` (or `-o`) each require a non-option value.
 

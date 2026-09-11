@@ -34,7 +34,11 @@ export function renderMarkdown(report: TaplineReport): string {
   if (report.commandResults) {
     lines.push('', '## Command results');
     for (const result of report.commandResults) {
-      lines.push(`- ${result.skipped ? 'SKIP' : result.exitCode === 0 ? 'PASS' : 'FAIL'} ${result.label}: ${result.skipped ? 'command unavailable' : `exit ${result.exitCode}`}`);
+      if (result.skipped) {
+        lines.push(`- SKIP ${result.label}: ${result.skipReason ?? 'command unavailable'}`);
+      } else {
+        lines.push(`- ${result.exitCode === 0 ? 'PASS' : 'FAIL'} ${result.label}: exit ${result.exitCode}`);
+      }
     }
   }
   lines.push('', report.releaseNotes, '');

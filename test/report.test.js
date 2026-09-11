@@ -71,3 +71,19 @@ test('renderReport shell-quotes validation paths with spaces', async () => {
 
   assert.ok(markdown.includes("ruby -c 'Formula/needs care.rb'"));
 });
+
+test('markdown reports surface actionable skip reasons for skipped commands', async () => {
+  const report = await createReport('examples/fixtures/sample-tap', { includeBrew: true, runCommands: true });
+  const markdown = renderReport(report, 'markdown');
+  const skipped = (report.commandResults ?? []).filter((entry) => entry.label.startsWith('Homebrew audit'));
+  assert.ok(skipped.length >= 4, 'fixture audits must be planned');
+  for (const entry of skipped) {
+    assert.equal(entry.skipped, true);
+    assert.equal(entry.exitCode, null);
+    assert.equal(entry.stderr, '');
+    assert.match(entry.skipReason ?? '', /brew tap/);
+  }
+  assert.match(markdown, /SKIP Homebrew audit: needs-care: .*brew tap/);
+  assert.doesNotMatch(markdown, /command unavailable/);
+  assert.doesNotMatch(markdown, /is disabled/);
+});
